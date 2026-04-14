@@ -408,9 +408,9 @@ export default function Dashboard() {
   const control = isDark ? "border-slate-600 bg-slate-700 text-slate-100" : "border-slate-200 bg-white text-slate-900";
 
   return (
-    <div className={`h-screen overflow-hidden ${surface}`}>
+    <div className={`h-screen overflow-hidden pt-20 ${surface}`}>
       <header className={`fixed inset-x-0 top-0 z-30 border-b ${isDark ? "border-slate-700 bg-slate-800" : "border-slate-200 bg-white"}`}>
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 lg:px-6">
           <div>
             <h1 className="text-xl font-bold">Smart Schedular</h1>
             <p className={`text-sm ${subtle}`}>{auth?.email}</p>
@@ -438,8 +438,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto mt-20 grid h-[calc(100vh-80px)] max-w-7xl grid-cols-12 gap-4 px-4 pb-4 pt-0">
-        <section className={`col-span-8 rounded-2xl border p-4 ${card} flex min-h-0 flex-col`}>
+      <main className="mx-auto grid h-[calc(100dvh-80px)] w-full max-w-7xl grid-cols-1 gap-3 px-3 pb-3 pt-0 lg:grid-cols-12 lg:gap-4 lg:px-4 lg:pb-4">
+        <section className={`col-span-1 lg:col-span-8 rounded-2xl border p-3 lg:p-4 ${card} flex min-h-0 flex-col`}>
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <label className="text-sm font-semibold">Team</label>
@@ -491,7 +491,7 @@ export default function Dashboard() {
 
         </section>
 
-        <section className={`col-span-4 rounded-2xl border p-4 ${card} flex min-h-0 flex-col`}>
+        <section className={`col-span-1 lg:col-span-4 rounded-2xl border p-3 lg:p-4 ${card} flex min-h-0 flex-col`}>
           <h2 className="text-lg font-semibold">Items on {selectedDate}</h2>
           <p className={`mb-3 text-sm ${subtle}`}>Event, Task and Note </p>
 
