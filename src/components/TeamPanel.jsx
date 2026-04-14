@@ -46,8 +46,10 @@ export default function TeamPanel({
   async function inviteMember(e) {
     e.preventDefault();
     if (!activeTeam || !inviteEmail.trim()) return;
+    const emails = inviteEmail.split(",").map(email => email.trim()).filter(email => email);
+    if (emails.length === 0) return;
     try {
-      const { data } = await api.post("/invite-member", { team_id: activeTeam.id, email: inviteEmail.trim() });
+      const { data } = await api.post("/invite-member", { team_id: activeTeam.id, emails });
       setStatus(data.message);
       setInviteEmail("");
     } catch (error) {
@@ -88,7 +90,7 @@ export default function TeamPanel({
 
       <form onSubmit={inviteMember} className="space-y-2">
         <p className="text-sm font-semibold text-brand-text">Invite Member</p>
-        <input className="w-full rounded-xl border p-2.5" placeholder="member@email.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+        <input className="w-full rounded-xl border p-2.5" placeholder="member1@email.com, member2@email.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
         <button className="w-full rounded-xl border border-brand-primary/35 bg-white py-2 text-brand-primary">Send Invite</button>
       </form>
 

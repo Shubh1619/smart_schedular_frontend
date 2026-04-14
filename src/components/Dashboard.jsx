@@ -264,10 +264,12 @@ export default function Dashboard() {
   }
 
   async function handleMemberInvite(teamId) {
-    const email = (inviteEmailByTeam[teamId] || "").trim();
-    if (!email) return;
+    const emailString = (inviteEmailByTeam[teamId] || "").trim();
+    if (!emailString) return;
+    const emails = emailString.split(",").map(email => email.trim()).filter(email => email);
+    if (emails.length === 0) return;
     try {
-      await api.post("/invite-member", { team_id: teamId, email });
+      await api.post("/invite-member", { team_id: teamId, emails });
       setInviteEmailByTeam((prev) => ({ ...prev, [teamId]: "" }));
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Unable to send invite"));
@@ -408,7 +410,7 @@ export default function Dashboard() {
   const control = isDark ? "border-slate-600 bg-slate-700 text-slate-100" : "border-slate-200 bg-white text-slate-900";
 
   return (
-    <div className={`h-screen overflow-hidden pt-20 ${surface}`}>
+    <div className={`h-screen overflow-hidden ${surface}`}>
       <header className={`fixed inset-x-0 top-0 z-30 border-b ${isDark ? "border-slate-700 bg-slate-800" : "border-slate-200 bg-white"}`}>
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 lg:px-6">
           <div>
@@ -438,8 +440,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto grid h-[calc(100dvh-80px)] w-full max-w-7xl grid-cols-1 gap-3 px-3 pb-3 pt-0 lg:grid-cols-12 lg:gap-4 lg:px-4 lg:pb-4">
-        <section className={`col-span-1 lg:col-span-8 rounded-2xl border p-3 lg:p-4 ${card} flex min-h-0 flex-col`}>
+      <main className="mx-auto grid h-[calc(100dvh-80px)] w-full max-w-7xl grid-cols-1 gap-1 px-1 pb-1 pt-0 lg:grid-cols-12 lg:gap-2 lg:px-2 lg:pb-2">
+        <section className={`col-span-1 lg:col-span-8 rounded-2xl border p-1 lg:p-2 ${card} flex min-h-0 flex-col`}>
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <label className="text-sm font-semibold">Team</label>
@@ -467,7 +469,7 @@ export default function Dashboard() {
             <div className={`text-sm ${subtle}`}>{selectedDate}</div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-indigo-200 bg-white p-3">
+          <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-indigo-200 bg-white p-1">
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
@@ -737,7 +739,7 @@ export default function Dashboard() {
                         <input
                           value={inviteEmailByTeam[team.id] || ""}
                           onChange={(e) => setInviteEmailByTeam((prev) => ({ ...prev, [team.id]: e.target.value }))}
-                          placeholder="Invite by email"
+                          placeholder="email1@example.com, email2@example.com"
                           className={`w-full rounded-lg border px-2 py-1 text-xs ${control}`}
                         />
                         <button onClick={() => handleMemberInvite(team.id)} className="rounded-lg border border-indigo-400 px-3 py-1 text-xs font-semibold text-indigo-600">
