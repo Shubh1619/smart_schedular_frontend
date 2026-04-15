@@ -89,6 +89,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboard();
+    
+    // Auto refresh data every 30 seconds
+    const interval = setInterval(() => {
+      loadTeamsAndSchedule();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -151,13 +158,20 @@ export default function Dashboard() {
   }
 
   async function loadTeamsAndSchedule() {
-    const [teamsResponse, scheduleResponse] = await Promise.all([api.get("/teams"), api.get("/schedule")]);
-    const teamList = teamsResponse.data || [];
-    setTeams(teamList);
-    setScheduleItems(scheduleResponse.data || []);
+    try {
+      const [teamsResponse, scheduleResponse] = await Promise.all([api.get("/teams"), api.get("/schedule")]);
+      const teamList = teamsResponse.data || [];
+      setTeams(teamList);
+      setScheduleItems(scheduleResponse.data || []);
 
-    if (!selectedTeamId || !teamList.find((team) => team.id === selectedTeamId)) {
-      setSelectedTeamId(teamList[0]?.id ?? null);
+      setSelectedTeamId(prevId => {
+        if (!prevId || !teamList.find((team) => team.id === prevId)) {
+          return teamList[0]?.id ?? null;
+        }
+        return prevId;
+      });
+    } catch (err) {
+      console.error("Auto-refresh failed", err);
     }
   }
 
