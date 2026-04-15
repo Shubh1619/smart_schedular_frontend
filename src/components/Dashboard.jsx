@@ -68,6 +68,8 @@ export default function Dashboard() {
 
   const [teamForm, setTeamForm] = useState({ name: "", participant_emails: "" });
   const [teamFormLoading, setTeamFormLoading] = useState(false);
+  const [joinCodeInput, setJoinCodeInput] = useState("");
+  const [joinLoading, setJoinLoading] = useState(false);
   const [inviteEmailByTeam, setInviteEmailByTeam] = useState({});
   const [renameByTeam, setRenameByTeam] = useState({});
 
@@ -113,8 +115,11 @@ export default function Dashboard() {
 
     joinTokenHandledRef.current = true;
     try {
-      await api.get("/join-team", { params: { token } });
+      const { data } = await api.get("/join-team", { params: { token } });
       await loadTeamsAndSchedule();
+      if (data.team_id) {
+        setSelectedTeamId(data.team_id);
+      }
       params.delete("token");
       const nextQuery = params.toString();
       const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}`;
@@ -238,6 +243,26 @@ export default function Dashboard() {
       window.alert(getApiErrorMessage(err, "Unable to create team"));
     } finally {
       setTeamFormLoading(false);
+    }
+  }
+
+  async function handleTeamJoin(e) {
+    e.preventDefault();
+    if (!joinCodeInput.trim()) return;
+    try {
+      setJoinLoading(true);
+      const { data } = await api.post("/join-team", { code: joinCodeInput.trim() });
+      await loadTeamsAndSchedule();
+      if (data.team_id) {
+        setSelectedTeamId(data.team_id);
+      }
+      setJoinCodeInput("");
+      setSidebarTab("profile");
+      setSidebarOpen(false);
+    } catch (err) {
+      window.alert(getApiErrorMessage(err, "Unable to join team"));
+    } finally {
+      setJoinLoading(false);
     }
   }
 
@@ -425,7 +450,7 @@ export default function Dashboard() {
               }}
               className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
-              Create Team
+              Create & Join Team
             </button>
             <button
               onClick={() => {
@@ -652,7 +677,7 @@ export default function Dashboard() {
             Profile
           </button>
           <button onClick={() => setSidebarTab("team")} className={`rounded-lg px-3 py-1.5 text-sm ${sidebarTab === "team" ? "bg-indigo-600 text-white" : isDark ? "bg-slate-700" : "bg-slate-100"}`}>
-            Create Team
+            Create & Join Team
           </button>
         </div>
 
@@ -685,24 +710,43 @@ export default function Dashboard() {
             </div>
           </form>
         ) : (
-          <form onSubmit={handleTeamCreate} className="space-y-2">
-            <input
-              value={teamForm.name}
-              onChange={(e) => setTeamForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Team name"
-              className={`w-full rounded-lg border px-3 py-2 text-sm ${control}`}
-              required
-            />
-            <textarea
-              value={teamForm.participant_emails}
-              onChange={(e) => setTeamForm((prev) => ({ ...prev, participant_emails: e.target.value }))}
-              placeholder="Participant emails (comma separated)"
-              className={`min-h-24 w-full rounded-lg border px-3 py-2 text-sm ${control}`}
-            />
-            <button disabled={teamFormLoading} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
-              {teamFormLoading ? "Creating..." : "Create Team & Send Invites"}
-            </button>
-          </form>
+          <div className="space-y-6">
+            <form onSubmit={handleTeamCreate} className="space-y-2">
+              <h4 className="text-sm font-semibold uppercase tracking-wide">Create a Team</h4>
+              <input
+                value={teamForm.name}
+                onChange={(e) => setTeamForm((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Team name"
+                className={`w-full rounded-lg border px-3 py-2 text-sm ${control}`}
+                required
+              />
+              <textarea
+                value={teamForm.participant_emails}
+                onChange={(e) => setTeamForm((prev) => ({ ...prev, participant_emails: e.target.value }))}
+                placeholder="Participant emails (comma separated)"
+                className={`min-h-24 w-full rounded-lg border px-3 py-2 text-sm ${control}`}
+              />
+              <button disabled={teamFormLoading} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
+                {teamFormLoading ? "Creating..." : "Create Team & Send Invites"}
+              </button>
+            </form>
+            
+            <form onSubmit={handleTeamJoin} className="space-y-2 border-t pt-4 border-slate-200 dark:border-slate-700">
+               <h4 className="text-sm font-semibold uppercase tracking-wide">Join an Existing Team</h4>
+               <div className="flex gap-2">
+                  <input
+                    value={joinCodeInput}
+                    onChange={(e) => setJoinCodeInput(e.target.value)}
+                    placeholder="Enter 8-character code"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm uppercase ${control}`}
+                    required
+                  />
+                  <button disabled={joinLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
+                    {joinLoading ? "..." : "Join"}
+                  </button>
+              </div>
+            </form>
+          </div>
         )}
 
         <div className="mt-5">
