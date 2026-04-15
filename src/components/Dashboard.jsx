@@ -90,10 +90,10 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard();
     
-    // Auto refresh data every 30 seconds
+    // Auto refresh data every 5 seconds
     const interval = setInterval(() => {
       loadTeamsAndSchedule();
-    }, 30000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, []);
@@ -408,6 +408,17 @@ export default function Dashboard() {
     setItemForm((prev) => ({ ...prev, assignee_ids: [] }));
   }
 
+  async function handleItemDelete(itemId) {
+    const ok = window.confirm("Delete this item?");
+    if (!ok) return;
+    try {
+      await api.delete(`/delete-item/${itemId}`);
+      await loadTeamsAndSchedule();
+    } catch (err) {
+      window.alert(getApiErrorMessage(err, "Unable to delete item"));
+    }
+  }
+
   function addLinkAttachment() {
     const url = linkInput.trim();
     if (!url) return;
@@ -663,8 +674,9 @@ export default function Dashboard() {
                       </div>
                     ) : null}
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => startEditItem(item)} className="text-xs font-semibold text-indigo-600">Edit</button>
+                  <div className="flex flex-col items-end gap-2">
+                    <button onClick={() => startEditItem(item)} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">Edit</button>
+                    <button onClick={() => handleItemDelete(item.id)} className="text-xs font-semibold text-rose-600 hover:text-rose-800">Delete</button>
                   </div>
                 </div>
               </div>
